@@ -8,7 +8,7 @@ setup(
     author='Thorin Tabor',
     author_email='tabor@broadinstitute.org',
     url='https://github.com/genepattern/genepattern-python',
-    download_url='https://github.com/genepattern/genepattern-python/archive/0.1.tar.gz',
+    download_url='https://github.com/genepattern/genepattern-python/archive/1.0.3.tar.gz',
     keywords=['genepattern', 'genomics', 'bioinformatics'],
     classifiers=['Framework :: IPython'],
 )
