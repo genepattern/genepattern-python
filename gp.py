@@ -1,6 +1,6 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
 __copyright__ = 'Copyright 2015, Broad Institute'
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 __status__ = 'Production'
 
 """ GenePattern Python Client
@@ -231,6 +231,7 @@ class GPJob(GPResource):
     log_files = None
     output_files = None
     num_output_files = None
+    children = None
 
     def __init__(self, server_data, uri):
         super(GPJob, self).__init__(server_data.url + "/rest/v1/jobs/" + str(uri))
@@ -247,7 +248,9 @@ class GPJob(GPResource):
 
         self.json = response.read().decode('utf-8')
         self.info = json.loads(self.json)
+        self.load_info()
 
+    def load_info(self):
         self.task_name = self.info['taskName']
         self.task_lsid = self.info['taskLsid']
         self.user_id = self.info['userId']
@@ -258,7 +261,28 @@ class GPJob(GPResource):
         self.output_files = self.info['outputFiles']
         self.num_output_files = self.info['numOutputFiles']
 
-        self.status = self.get_status_message()
+        # Create children, if relevant
+        self.children = self.get_child_jobs()
+
+    def get_child_jobs(self):
+        # Lazily load info
+        if self.info is None:
+            self.get_info()
+
+        # Lazily load children
+        if self.children is not None:
+            return self.children
+        else:
+            if 'children' in self.info:
+                child_list = []
+                for child in self.info['children']['items']:
+                    child_job = GPJob(self.server_data, child['jobId'])
+                    child_job.info = child
+                    child_job.load_info()
+                    child_list.append(child_job)
+                return child_list
+            else:               # No children? Return empty list
+                return []
 
     def is_finished(self):
         self.get_info()
