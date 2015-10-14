@@ -11,3 +11,9 @@ This library supports Python 2.7 and Python 3.3+.
 It is recommended to install this library from PIP. Simply execute the command below:
 
 > sudo pip install genepattern-python
+
+## Upgrading
+
+To upgrade to the latest version of the library, execute the command below:
+
+> sudo pip install genepattern-python --upgrade
