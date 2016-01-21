@@ -1,6 +1,6 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
-__copyright__ = 'Copyright 2015, Broad Institute'
-__version__ = '1.0.6'
+__copyright__ = 'Copyright 2015-2016, Broad Institute'
+__version__ = '1.0.7'
 __status__ = 'Production'
 
 """ GenePattern Python Client
@@ -61,6 +61,11 @@ class GPServer(object):
         return self.url + ' ' + self.username + ' ' + self.password
 
     def authorization_header(self):
+        """
+        Returns a string containing the authorization header used to authenticate
+        with GenePattern. This string is included in the header of subsequent
+        requests sent to GenePattern.
+        """
         return self.auth_header
 
     def upload_file(self, file_name, file_path):
@@ -136,12 +141,17 @@ class GPServer(object):
         data = json.loads(response.read().decode('utf-8'))
         job = GPJob(self, data['jobId'])
         job.get_info()
-        self.last_job = job # Set the last job
+        self.last_job = job  # Set the last job
         if wait_until_done:
             job.wait_until_done()
         return job
 
     def get_task_list(self):
+        """
+        Queries the GenePattern server and returns a list of GPTask objects,
+        each representing one of the modules installed on the server. Useful
+        for determining which are available on the server.
+        """
         request = urllib2.Request(self.url + '/rest/v1/tasks/all.json')
         if self.authorization_header() is not None:
             request.add_header('Authorization', self.authorization_header())
@@ -157,6 +167,15 @@ class GPServer(object):
         return task_list
 
     def wait_until_complete(self, job_list):
+        """
+        Args: Accepts a list of GPJob objects
+
+        This method will not return until all GPJob objects in the list have
+        finished running. That us, they are either complete and have resulted in
+        an error state.
+
+        This method will occasionally query each job to see if it is finished.
+        """
         complete = [False] * len(job_list)
         wait = 1
         while not all(complete):
@@ -197,6 +216,17 @@ class GPFile(GPResource):
         self.server_data = server_data
 
     def open(self):
+        """
+        Opens the URL associated with the GPFile and returns a file-like object
+        with three extra methods:
+
+            * geturl() - return the ultimate URL (can be used to determine if a
+                redirect was followed)
+
+            * info() - return the meta-information of the page, such as headers
+
+            * getcode() - return the HTTP status code of the response
+        """
         request = urllib2.Request(self.uri)
         if self.server_data.authorization_header() is not None:
             request.add_header('Authorization', self.server_data.authorization_header())
@@ -204,11 +234,17 @@ class GPFile(GPResource):
         return urllib2.urlopen(request)
 
     def read(self):
+        """
+        Reads the contents of the GPFile and returns the contents as a string
+        """
         with closing(self.open()) as f:
             data = f.read()
         return data or None
 
     def get_url(self):
+        """
+        Returns the URL to the GPFile
+        """
         return self.uri
 
 
@@ -240,6 +276,19 @@ class GPJob(GPResource):
         self.job_number = uri
 
     def get_info(self):
+        """
+        Query the GenePattern server for metadata regarding this job and assign
+        that metadata to the properties on this GPJob object. Including:
+            * Task Name
+            * LSID
+            * User ID
+            * Job Number
+            * Status
+            * Date Submitted
+            * URL of Log Files
+            * URL of Output Files
+            * Number of Output Files
+        """
         request = urllib2.Request(self.uri)
         if self.server_data.authorization_header() is not None:
             request.add_header('Authorization', self.server_data.authorization_header())
@@ -251,6 +300,12 @@ class GPJob(GPResource):
         self.load_info()
 
     def load_info(self):
+        """
+        Parses the JSON object stored at GPJob.info and assigns its metadata to
+        properties of this GPJob object.
+
+        Primarily intended to be called from GPJob.get_info().
+        """
         self.task_name = self.info['taskName']
         self.task_lsid = self.info['taskLsid']
         self.user_id = self.info['userId']
@@ -265,6 +320,11 @@ class GPJob(GPResource):
         self.children = self.get_child_jobs()
 
     def get_child_jobs(self):
+        """
+        Queries the GenePattern server for child jobs of this job, creates GPJob
+        objects representing each of them and assigns the list of them to the
+        GPJob.children property. Then return this list.
+        """
         # Lazily load info
         if self.info is None:
             self.get_info()
@@ -285,6 +345,10 @@ class GPJob(GPResource):
                 return []
 
     def is_finished(self):
+        """
+        Queries the server to check if the job has been completed.
+        Returns True or False.
+        """
         self.get_info()
 
         if 'status' not in self.info:
@@ -295,6 +359,10 @@ class GPJob(GPResource):
         return self.info['status']['isFinished']
 
     def get_status_message(self):
+        """
+        Returns the status message for the job, querying the
+        server if necessary.
+        """
         # Lazily load info
         if self.info is None:
             self.get_info()
@@ -302,6 +370,11 @@ class GPJob(GPResource):
         return self.info['status']['statusMessage']
 
     def get_output_files(self):
+        """
+        Returns a list of the files output by the job, querying the server if
+        necessary. If the job has output no files, an empty list will be
+        returned.
+        """
         # Lazily load info
         if self.info is None:
             self.get_info()
@@ -312,6 +385,11 @@ class GPJob(GPResource):
             return []
 
     def wait_until_done(self):
+        """
+        This method will not return until the job is either complete or has
+        reached an error state. This queries the server periodically to check
+        for an update in status.
+        """
         wait = 1
         while True:
             time.sleep(wait)
@@ -322,6 +400,9 @@ class GPJob(GPResource):
             wait = min(wait * 2, 60)
 
     def get_job_status_url(self):
+        """
+        Returns the URL of the job's status page on the GenePattern server
+        """
         return self.server_data.url + "/pages/index.jsf?jobid=" + self.uri.split("/")[-1]
 
 
@@ -340,6 +421,13 @@ class GPJobSpec(object):
         self.server_data = server_data
 
     def set_parameter(self, name, values, group_id=None):
+        """
+        Sets the value of a parameter for the GPJobSpec
+        :param name: name of the parameter
+        :param values: list of values for the parameter
+        :param group_id: optional parameter group ID
+        :return:
+        """
         if not isinstance(values, list):
             values = [values]
         if group_id is None:
@@ -390,6 +478,10 @@ class GPTask(GPResource):
                 self.version = task_dict['version']
 
     def param_load(self):
+        """
+        Queries the server for the parameter information and other metadata associated with
+        this task
+        """
         # Differences between Python 2 and Python 3
         escaped_uri = self.uri
         if sys.version_info.major == 2:
@@ -415,28 +507,46 @@ class GPTask(GPResource):
             self.params.append(GPTaskParam(self, param))
 
     def get_lsid(self):
+        """
+        :return: Returns the task's LSID as a string
+        """
         return self.lsid
 
     def get_name(self):
+        """
+        :return: Returns the task's name as a string
+        """
         return self.name
 
     def get_description(self):
-        """ Returns task description.
+        """
+        :return: Returns the task's description as a string
         """
         return self.description
 
     def get_version(self):
+        """
+        :return: Returns the task's version as a string
+        """
         return self.version
 
     def get_parameters(self):
+        """
+        :return: Returns a list of GPTaskParam objects representing the parameters for this
+        task, in order
+        """
         return self.params
 
     def make_job_spec(self):
+        """
+        :return: Returns a GPJobSpec used to launch a job of this task type
+        """
         return GPJobSpec(self.server_data, self.lsid)
 
 
 class GPTaskParam(object):
-    """Encapsulates single parameter information.
+    """
+    Encapsulates single parameter information.
 
     The constructor's input parameter is the data transfer object
     associated with a single task parameter (i.e., element from list
@@ -459,12 +569,23 @@ class GPTaskParam(object):
         self.attributes = dto[self.name]['attributes']
 
     def get_dto(self):
+        """
+        Returns a raw object representing the parameter. This is mostly used to
+        initialize GPTaskParam objects
+        """
         return self.dto
 
     def get_name(self):
+        """
+        :return: Returns the parameter name as a string
+        """
         return self.name
 
     def is_optional(self):
+        """
+        Returns whether the parameter is optional or required
+        :return: Return True if optional, False if required
+        """
         if (('optional' in self.attributes and bool(self.attributes['optional'].strip())) and
                 ('minValue' in self.attributes and self.attributes['minValue'] == 0)):
             return True
@@ -472,6 +593,9 @@ class GPTaskParam(object):
             return False
 
     def get_description(self):
+        """
+        :return: Returns the parameter description as a string
+        """
         return self.description
 
     def get_type(self):
@@ -481,7 +605,6 @@ class GPTaskParam(object):
         The type attribute (e.g., java.io.File, java.lang.Integer, java.lang.Float),
         which might give a hint as to what string should represent,
         is not enforced and not employed consistently across all tasks, so we ignore.
-
         """
 
         if 'TYPE' in self.attributes and 'MODE' in self.attributes:
@@ -506,6 +629,10 @@ class GPTaskParam(object):
             return False
 
     def allow_multiple(self):
+        """
+        Return whether the parameter allows multiple values or not
+        :return: Return True if the parameter allows multiple values, otherwise False
+        """
         # note that maxValue means "max number of values", and is an integer, not a string
         if (('maxValue' in self.attributes) and
                 (self.attributes['maxValue'] > 1)):
@@ -514,6 +641,9 @@ class GPTaskParam(object):
             return False
 
     def get_default_value(self):
+        """
+        Return the default value for the parameter. If here is no default value, return None
+        """
         if ('default_value' in self.attributes and
                 bool(self.attributes['default_value'].strip())):
             return self.attributes['default_value']
@@ -521,12 +651,19 @@ class GPTaskParam(object):
             return None
 
     def is_choice_param(self):
+        """
+        :return: Return True if this is a choice parameter, otherwise False
+        """
         return 'choiceInfo' in self.dto[self.name]
 
-    # returns a message field, which indicates whether choices statically
-    # or dynamically defined, and flag indicating whether a dynamic file
-    # selection loading error occurred.
     def get_choice_status(self):
+        """
+        Returns a message field, which indicates whether choices statically
+        or dynamically defined, and flag indicating whether a dynamic file
+        selection loading error occurred.
+
+        Throws an error if this is not a choice parameter.
+        """
         if 'choiceInfo' not in self.dto[self.name]:
             raise GPException('not a choice parameter')
 
@@ -534,13 +671,20 @@ class GPTaskParam(object):
         return status['message'], status['flag']
 
     def get_choice_href(self):
+        """
+        Returns the HREF of a dynamic choice parameter.
+        Throws an error if this is not a choice parameter.
+        """
         if 'choiceInfo' not in self.dto[self.name]:
             raise GPException('not a choice parameter')
 
         return self.dto[self.name]['choiceInfo']['href']
 
-    # the default selection from a choice menu
     def get_choice_selected_value(self):
+        """
+        Returns the default selection from a choice menu
+        Throws an error if this is not a choice parameter.
+        """
         if 'choiceInfo' not in self.dto[self.name]:
             raise GPException('not a choice parameter')
         choice_info_dto = self.dto[self.name]['choiceInfo']
@@ -568,7 +712,6 @@ class GPTaskParam(object):
         Each object has two keys defined: 'value', 'label'.
         The 'label' entry is what should be displayed on the UI, the 'value' entry
         is what is written into GPJobSpec.
-
         """
 
         if 'choiceInfo' not in self.dto[self.name]:
@@ -585,9 +728,12 @@ class GPTaskParam(object):
             self.dto[self.name]['choiceInfo'] = json.loads(response.read().decode('utf-8'))
         return self.dto[self.name]['choiceInfo']['choices']
 
-    # only pipeline prompt-when-run parameters
-    # can have alternate names and alternate descriptions
     def get_alt_name(self):
+        """
+        Returns the alternate name of a parameter.
+        Only pipeline prompt-when-run parameters
+        can have alternate names and alternate descriptions
+        """
         if ('altName' in self.attributes and
                 bool(self.attributes['altName'].strip())):
             return self.attributes['altName']
@@ -595,18 +741,30 @@ class GPTaskParam(object):
             return None
 
     def get_alt_description(self):
+        """
+        Returns the alternate description of a parameter.
+        Only pipeline prompt-when-run parameters
+        can have alternate names and alternate descriptions
+        """
         if 'altDescription' in self.attributes and bool(self.attributes['altDescription'].strip()):
             return self.attributes['altDescription']
         else:
             return None
 
     def _is_string_true(self, test):
+        """
+        Determines whether a string value is "True" for the purposes of GenePattern's
+        parameter parsing
+        """
         if type(test) is bool:
             return test
         return test.lower() in ('on', 'yes', 'true')
 
 
 class GPException(Exception):
+    """
+    An exception raised by GenePattern and returned to the user
+    """
     def __init__(self, value):
         self.value = value
 
