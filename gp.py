@@ -1,6 +1,6 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
 __copyright__ = 'Copyright 2015-2016, Broad Institute'
-__version__ = '1.0.7'
+__version__ = '1.1.0'
 __status__ = 'Production'
 
 """ GenePattern Python Client
@@ -312,6 +312,7 @@ class GPJob(GPResource):
         self.job_number = int(self.info['jobId'])
         self.status = self.get_status_message()
         self.date_submitted = self.info['dateSubmitted']
+        self.date_completed = self.info['dateCompleted']
         self.log_files = self.info['logFiles']
         self.output_files = self.info['outputFiles']
         self.num_output_files = self.info['numOutputFiles']
@@ -358,6 +359,34 @@ class GPJob(GPResource):
 
         return self.info['status']['isFinished']
 
+    def has_error(self):
+        """
+        Queries the server to check if the job has an error.
+        Returns True or False.
+        """
+        self.get_info()
+
+        if 'status' not in self.info:
+            return False
+        if 'hasError' not in self.info['status']:
+            return False
+
+        return self.info['status']['hasError']
+
+    def is_pending(self):
+        """
+        Queries the server to check if the job is pending.
+        Returns True or False.
+        """
+        self.get_info()
+
+        if 'status' not in self.info:
+            return False
+        if 'isPending' not in self.info['status']:
+            return False
+
+        return self.info['status']['isPending']
+
     def get_status_message(self):
         """
         Returns the status message for the job, querying the
@@ -368,6 +397,34 @@ class GPJob(GPResource):
             self.get_info()
 
         return self.info['status']['statusMessage']
+
+    def get_tags(self):
+        """
+        Returns the tags for the job, querying the
+        server if necessary.
+        """
+        # Lazily load info
+        if self.info is None:
+            self.get_info()
+
+        if 'tags' in self.info:
+            return [structure['tag']['tag'] for structure in self.info['tags']]
+        else:
+            return []
+
+    def get_comments(self):
+        """
+        Returns the comments for the job, querying the
+        server if necessary.
+        """
+        # Lazily load info
+        if self.info is None:
+            self.get_info()
+
+        if 'comments' in self.info:
+            return [structure['text'] for structure in self.info['comments']['comments']]
+        else:
+            return []
 
     def get_output_files(self):
         """
