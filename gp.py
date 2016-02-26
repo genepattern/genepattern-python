@@ -1,6 +1,6 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
 __copyright__ = 'Copyright 2015-2016, Broad Institute'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __status__ = 'Production'
 
 """ GenePattern Python Client
@@ -312,7 +312,6 @@ class GPJob(GPResource):
         self.job_number = int(self.info['jobId'])
         self.status = self.get_status_message()
         self.date_submitted = self.info['dateSubmitted']
-        self.date_completed = self.info['dateCompleted']
         self.log_files = self.info['logFiles']
         self.output_files = self.info['outputFiles']
         self.num_output_files = self.info['numOutputFiles']
