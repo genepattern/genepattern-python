@@ -126,7 +126,7 @@ class GPServer(object):
 
         # names should be a list of names,
         # values should be a list of **lists** of values
-        json_string = json.dumps({'lsid': job_spec.lsid, 'params': job_spec.params})
+        json_string = json.dumps({'lsid': job_spec.lsid, 'params': job_spec.params, 'tags': ['GenePattern Python Client']})
         if sys.version_info.major == 3:  # Handle conversion to bytes for Python 3
             json_string = bytes(json_string, 'utf-8')
         request = urllib2.Request(self.url + '/rest/v1/jobs')
