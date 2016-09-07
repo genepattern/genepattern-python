@@ -1,6 +1,6 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
 __copyright__ = 'Copyright 2015-2016, Broad Institute'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __status__ = 'Production'
 
 """ GenePattern Python Client
@@ -235,11 +235,11 @@ class GPFile(GPResource):
 
     def read(self):
         """
-        Reads the contents of the GPFile and returns the contents as a string
+        Reads the contents of the GPFile and returns the contents as a string (assumes UTF-8)
         """
         with closing(self.open()) as f:
             data = f.read()
-        return data or None
+        return data.decode("utf-8") or None
 
     def get_url(self):
         """
