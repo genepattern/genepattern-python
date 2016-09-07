@@ -17,3 +17,7 @@ It is recommended to install this library from PIP. Simply execute the command b
 To upgrade to the latest version of the library, execute the command below:
 
 > sudo pip install genepattern-python --upgrade
+
+## Tutorial
+
+A tutorial on how to use the GenePattern Python Library is [available here](https://github.com/genepattern/genepattern-notebook/blob/master/Notebooks/GenePattern%20Python%20Tutorial.ipynb).
