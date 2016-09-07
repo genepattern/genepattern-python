@@ -19,8 +19,10 @@ from contextlib import closing
 # Imports requiring compatibility between Python 2 and Python 3
 if sys.version_info.major == 2:
     import urllib2
+    import urllib as parse
 elif sys.version_info.major == 3:
     from urllib import request as urllib2
+    import urllib.parse as parse
 
 
 class GPServer(object):
@@ -247,6 +249,12 @@ class GPFile(GPResource):
         """
         return self.uri
 
+    def get_name(self):
+        """
+        Returns the file name of the output file
+        """
+        return parse.unquote(self.get_url().split('/')[-1])
+
 
 class GPJob(GPResource):
     """
@@ -439,6 +447,17 @@ class GPJob(GPResource):
             return [GPFile(self.server_data, f['link']['href']) for f in self.info['outputFiles']]
         else:
             return []
+
+    def get_file(self, name):
+        """
+        Returns the output file with the specified name, if no output files
+        match, returns None.
+        """
+        files = self.get_output_files()
+        for f in files:
+            if f.get_name() == name:
+                return f
+        return None
 
     def wait_until_done(self):
         """
