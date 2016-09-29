@@ -47,8 +47,17 @@ class GCT(object):
             raise ImportError('pandas is required to work with a GCT file in a DataFrame.' +
                               ' Try: pip install pandas')
 
+        # Check to see if gct_io if a GPFile object from the GenePattern Python Client, if installed
+        try:
+            import gp
+            if isinstance(gct_obj, gp.GPFile):
+                gct_io = gct_obj.open()
+        except ImportError:
+            pass
+
         # Check to see if gct_obj is a file-like object
-        if hasattr(gct_obj, 'read'):
+        # Skip if a file-like object has already been obtained
+        if hasattr(gct_obj, 'read') and gct_io is None:
             gct_io = gct_obj
 
         # Check to see if gct_obj is a string
