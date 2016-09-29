@@ -17,7 +17,7 @@ __status__ = 'Beta'
 GCT Tools
 
 Tools for loading a GCT file and working with its contents as a Pandas DataFrame.
-Compatible with Python 2.7 and Python 3.4
+Compatible with Python 2.7 and Python 3.4+
 """
 
 

@@ -3,9 +3,10 @@ __copyright__ = 'Copyright 2015-2016, Broad Institute'
 __version__ = '1.2.0'
 __status__ = 'Production'
 
-""" GenePattern Python Client
+"""
+GenePattern Python Client
 
-    Compatible with Python 2.7 and Python 3.4
+Compatible with Python 2.7 and Python 3.4+
 """
 
 
