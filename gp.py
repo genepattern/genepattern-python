@@ -1,6 +1,6 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
 __copyright__ = 'Copyright 2015-2016, Broad Institute'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __status__ = 'Production'
 
 """
