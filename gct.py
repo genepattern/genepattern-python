@@ -1,13 +1,3 @@
-import re
-import sys
-import io
-
-# Imports requiring compatibility between Python 2 and Python 3
-if sys.version_info.major == 2:
-    import urllib2
-else:
-    import urllib.request as urllib2
-
 __authors__ = ['Thorin Tabor']
 __copyright__ = 'Copyright 2016, Broad Institute'
 __version__ = '0.0.1'
@@ -19,6 +9,16 @@ GCT Tools
 Tools for loading a GCT file and working with its contents as a Pandas DataFrame.
 Compatible with Python 2.7 and Python 3.4+
 """
+
+import re
+import sys
+import io
+
+# Imports requiring compatibility between Python 2 and Python 3
+if sys.version_info.major == 2:
+    import urllib2
+else:
+    import urllib.request as urllib2
 
 
 class GCT(object):
