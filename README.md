@@ -20,4 +20,4 @@ To upgrade to the latest version of the library, execute the command below:
 
 ## Tutorial
 
-A tutorial on how to use the GenePattern Python Library is [available here](https://github.com/genepattern/genepattern-notebook/blob/master/Notebooks/GenePattern%20Python%20Tutorial.ipynb).
+A tutorial on how to use the GenePattern Python Library is [available here](https://github.com/genepattern/example-notebooks/blob/master/GenePattern%20Python%20Tutorial.ipynb).
