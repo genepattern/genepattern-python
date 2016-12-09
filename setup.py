@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='genepattern-python',
-    py_modules=['gp', 'gct', 'odf'],
+    packages=['gp'],
     version='1.2.2',
     description='Library for programmatically interacting with GenePattern from Python.',
     author='Thorin Tabor',
