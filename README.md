@@ -4,7 +4,7 @@ This is a Python library for working with GenePattern programmatically. Calls fr
 
 ## Supported Versions
 
-This library supports Python 2.7 and Python 3.3+.
+This library supports Python 2.7 and Python 3.3+. The bundled GCT Tools require [pandas](http://pandas.pydata.org/), although the rest of the features do not.
 
 ## Installing
 
@@ -20,4 +20,8 @@ To upgrade to the latest version of the library, execute the command below:
 
 ## Tutorial
 
-A tutorial on how to use the GenePattern Python Library is [available here](https://github.com/genepattern/genepattern-notebook/blob/master/Notebooks/GenePattern%20Python%20Tutorial.ipynb).
+A tutorial on how to use the GenePattern Python Library is [available here](https://github.com/genepattern/example-notebooks/blob/master/GenePattern%20Python%20Tutorial.ipynb).
+
+## "Connection Reset by Peer" Error
+
+Connecting to the GenePattern public server now requires TLS 1.2+. Older versions of SSL and TLS will no longer work. If you're attempting to connect and receiving a "Connection Reset by Peer" error, you will need to update the OpenSSL library associated with your Python installation.
