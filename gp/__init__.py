@@ -1,6 +1,5 @@
 __authors__ = ['Thorin Tabor', 'Chet Birger']
-__copyright__ = 'Copyright 2015-2016, Broad Institute'
-__version__ = '1.2.2'
+__version__ = '1.2.3'
 __status__ = 'Production'
 
 """
@@ -279,7 +278,7 @@ class GPJob(GPResource):
     children = None
 
     def __init__(self, server_data, uri):
-        super(GPJob, self).__init__(server_data.url + "/rest/v1/jobs/" + str(uri))
+        super(GPJob, self).__init__(str(uri))
         self.info = None
         self.server_data = server_data
         self.job_number = uri
@@ -298,7 +297,7 @@ class GPJob(GPResource):
             * URL of Output Files
             * Number of Output Files
         """
-        request = urllib2.Request(self.uri)
+        request = urllib2.Request(self.server_data.url + "/rest/v1/jobs/" + self.uri)
         if self.server_data.authorization_header() is not None:
             request.add_header('Authorization', self.server_data.authorization_header())
         request.add_header('User-Agent', 'GenePatternRest')
@@ -479,7 +478,7 @@ class GPJob(GPResource):
         """
         Returns the URL of the job's status page on the GenePattern server
         """
-        return self.server_data.url + "/pages/index.jsf?jobid=" + self.uri.split("/")[-1]
+        return self.server_data.url + "/pages/index.jsf?jobid=" + self.uri
 
 
 class GPJobSpec(object):
