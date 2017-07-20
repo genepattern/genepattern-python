@@ -6,6 +6,7 @@ Tools for converting Python scripts into GenePattern server modules
 Compatible with Python 2.7 and Python 3.4+
 """
 
+import json
 import os
 import string
 import zipfile
@@ -17,25 +18,32 @@ __version__ = '0.1.0'
 __status__ = 'Beta'
 
 
-class Privacy(Enum):
+class StringEnum(str, Enum):
+    """
+    Enum where members are also (and must be) strings
+    Necessary for JSON serialization of the Enums declared here
+    """
+
+
+class Privacy(StringEnum):
     PRIVATE = "private"
     PUBLIC = "public"
 
 
-class Quality(Enum):
+class Quality(StringEnum):
     DEVELOPMENT = "development"
     PREPRODUCTION = "preproduction"
     PRODUCTION = "production"
 
 
-class OS(Enum):
+class OS(StringEnum):
     ANY = "any"
     LINUX = "linux"
     MAC = "mac"
     WINDOWS = "windows"
 
 
-class CPU(Enum):
+class CPU(StringEnum):
     ANY = "any"
     ALPHA = "alpha"
     INTEL = "intel"
@@ -82,6 +90,12 @@ class GPTaskSpec:
         self.parameters = parameters
 
     def validate(self):
+        """
+        Perform some basic checks to help ensure that the specification is valid.
+        Throws an exception if an invalid value is found.
+        Returns true if all checks were passed.
+        :return: boolean
+        """
         # Check all values for None
         for attr in self.__dict__:
             if self.__dict__[attr] is None:
@@ -119,6 +133,11 @@ class GPTaskSpec:
         return True
 
     def create_zip(self, clean=True):
+        """
+        Creates a GenePattern module zip file for upload and installation on a GenePattern server
+        :param clean: boolean
+        :return:
+        """
         # First validate the attributes
         self.validate()
 
@@ -137,6 +156,10 @@ class GPTaskSpec:
             os.remove(MANIFEST_FILE_NAME)
 
     def _zip_files(self):
+        """
+        Adds the manifest and all support files to the zip file
+        :return:
+        """
         # Create the zip file
         zip = zipfile.ZipFile(self.name + '.zip', 'w', zipfile.ZIP_DEFLATED)
 
@@ -238,17 +261,31 @@ class GPTaskSpec:
 
     @staticmethod
     def all_strings(arr):
+        """
+        Ensures that the argument is a list that either is empty or contains only strings
+        :param arr: list
+        :return:
+        """
         if not isinstance([], list):
             raise TypeError("non-list value found where list is expected")
         return all(isinstance(x, str) for x in arr)
 
     @staticmethod
     def _all_params(arr):
+        """
+        Ensures that the argument is a list that either is empty or contains only GPParamSpec's
+        :param arr: list
+        :return:
+        """
         if not isinstance([], list):
             raise TypeError("non-list value found for parameters")
         return all(isinstance(x, GPParamSpec) for x in arr)
 
     def _valid_lsid(self):
+        """
+        Performs some basic (non-comprehensive) LSID validation
+        :return:
+        """
         if not isinstance(self.lsid, str):
             raise TypeError("lsid is not a string, string expected: " + str(self.lsid))
 
@@ -267,7 +304,7 @@ class GPTaskSpec:
         return set(string.punctuation.replace("_", "").replace(".", "") + string.whitespace)
 
 
-class Type(Enum):
+class Type(StringEnum):
     FILE = "FILE"
     TEXT = "TEXT"
     INTEGER = "Integer"
@@ -276,7 +313,7 @@ class Type(Enum):
     PASSWORD = "PASSWORD"
 
 
-class JavaType(Enum):
+class JavaType(StringEnum):
     FILE = "java.io.File"
     TEXT = "java.lang.String"
     INTEGER = "java.lang.Integer"
@@ -285,7 +322,7 @@ class JavaType(Enum):
     PASSWORD = "PASSWORD"
 
 
-class Optional(Enum):
+class Optional(StringEnum):
     REQUIRED = ""
     OPTIONAL = "on"
 
