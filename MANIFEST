@@ -2,4 +2,6 @@
 setup.cfg
 setup.py
 gp/__init__.py
+gp/core.py
 gp/data.py
+gp/modules.py
