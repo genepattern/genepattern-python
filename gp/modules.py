@@ -5,16 +5,22 @@ Tools for converting Python scripts into GenePattern server modules
 
 Compatible with Python 2.7 and Python 3.4+
 """
-
+import getpass
 import json
 import os
+import pathlib
+import socket
 import string
 import zipfile
 from enum import Enum
 from datetime import datetime
 
+import re
+
+from gp import GPServer
+
 __authors__ = ['Thorin Tabor']
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __status__ = 'Beta'
 
 
@@ -52,6 +58,7 @@ class CPU(StringEnum):
 
 
 MANIFEST_FILE_NAME = "manifest"
+DEFAULT_LSID_AUTHORITY = 0
 
 
 class GPTaskSpec:
@@ -63,7 +70,7 @@ class GPTaskSpec:
                  categories=[], privacy=Privacy.PRIVATE, quality=Quality.DEVELOPMENT,
                  file_format=[], os=OS.ANY, cpu=CPU.ANY, language="Python",
                  user=None, support_files=[], documentation="", license="",
-                 lsid=None, command_line=None, parameters=[]):
+                 lsid=None, version=1, lsid_authority=DEFAULT_LSID_AUTHORITY, command_line=None, parameters=[]):
 
         self.name = name
         self.description = description
@@ -85,7 +92,10 @@ class GPTaskSpec:
         self.documentation = documentation
         self.license = license
 
-        self.lsid = lsid
+        # Use None for no LSID checking
+        self.lsid_authority = lsid_authority if lsid_authority != DEFAULT_LSID_AUTHORITY else LSIDAuthority()
+        self.version = version
+        self.lsid = lsid if lsid else self._get_lsid()
         self.command_line = command_line
         self.parameters = parameters
 
@@ -132,7 +142,7 @@ class GPTaskSpec:
         # Return that everything validates
         return True
 
-    def create_zip(self, clean=True):
+    def create_zip(self, clean=True, increment_version=True, register=True):
         """
         Creates a GenePattern module zip file for upload and installation on a GenePattern server
         :param clean: boolean
@@ -151,9 +161,29 @@ class GPTaskSpec:
         # Create the zip
         self._zip_files()
 
+        # Increment the version of the module
+        if increment_version:
+            self.version += 1
+
+        # Register the module with the LSID authority
+        if register and self.lsid_authority:
+            self.lsid_authority.register(self)
+
         # Clean up the manifest
         if clean:
             os.remove(MANIFEST_FILE_NAME)
+
+    def _get_lsid(self):
+        """
+        Assigns the module an LSID from the LSID authority
+        :return:
+        """
+        # If no LSID authority, skip LSID assignment
+        if self.lsid_authority is None:
+            return
+
+        # Otherwise assign the LSID
+        return self.lsid_authority.lsid()
 
     def _zip_files(self):
         """
@@ -192,7 +222,7 @@ class GPTaskSpec:
 
         # Write initial attributes
         manifest_file.write("JVMLevel=\n")
-        manifest_file.write("LSID=" + self.manifest_escape(self.lsid) + "\n")
+        manifest_file.write("LSID=" + self.manifest_escape(self.lsid) + ':' + str(self.version) + "\n")
         manifest_file.write("author=" + self._author_line() + "\n")
         manifest_file.write("categories=" + ';'.join(self.categories) + "\n")
         manifest_file.write("commandLine=" + self.command_line + "\n")
@@ -289,11 +319,16 @@ class GPTaskSpec:
         if not isinstance(self.lsid, str):
             raise TypeError("lsid is not a string, string expected: " + str(self.lsid))
 
-        if self.lsid.count(':') != 5:
-            raise ValueError("lsid contains incorrect number of colons, 5 expected: " + str(self.lsid))
+        if self.lsid.count(':') != 4:
+            raise ValueError("lsid contains incorrect number of colons, 4 expected: " + str(self.lsid))
 
         if self.lsid.split(':')[0].lower() != 'urn':
             raise ValueError("lsid does not begin with urn: " + str(self.lsid))
+
+        # If an LSID authority is specified, check with the authority
+        if self.lsid_authority:
+            if not self.lsid_authority.validate(self.lsid, check_existing=False):
+                raise ValueError("lsid does not the authority: " + str(self.lsid))
 
     @staticmethod
     def invalid_chars():
@@ -447,3 +482,239 @@ class GPParamSpec:
         :return: string
         """
         return JavaType[self.type.name].value
+
+
+class LSIDAuthority:
+    """
+    Class representing a Life Science Identifier (LSID) authority used to assign an LSID to the
+    GenePattern modules produced by this package.
+    """
+    authority = None
+    base_lsid = None
+    module_count = None
+    registered_modules = None
+
+    def __init__(self, authority=None):
+        """
+        Initializes an LSID authority. Looks for an LSID authority file. If no such file is found,
+        a file will be created with an LSID based off the machine's hostname or IP address.
+
+        LSID authority standard location:
+            ~/.genepattern/lsid_authority.json
+
+        :param authority: Must be a file path to the LSID authority file, or a gpserver object (not implemented).
+        """
+
+        # Handle default authority file locations
+        if authority is None:
+            # Check for LSID authority file in user directory
+            user_dir = str(pathlib.Path.home())
+            gp_dir = os.path.join(user_dir, '.genepattern')
+            default_authority_file = os.path.join(gp_dir, 'lsid_authority.json')
+            if os.path.isfile(default_authority_file):
+                # Authority file found, assign path
+                authority = default_authority_file
+            else:
+                # No authority file found, lazily create file
+                self._create_authority_file(default_authority_file)
+                authority = default_authority_file
+
+        # Handle a GenePattern server as the LSID authority
+        if type(authority) == GPServer:
+            raise NotImplementedError("Support for GenePattern server as a remote LSID authority is not implemented.")
+
+        # Handle a string file path as an LSID authority
+        if type(authority) == str:
+            if os.path.isfile(authority):
+                if os.access(authority, os.R_OK) and os.access(authority, os.W_OK):
+                    try:
+                        # Load the authority file
+                        self.authority = authority
+                        self._load_lsid_authority()
+                    except Exception as e:
+                        raise RuntimeError("Unable to read authority file due to: " + str(e))
+                else:
+                    raise RuntimeError("Missing permissions on provided LSID authority file")
+            else:
+                raise RuntimeError("Provided LSID authority isn't a file")
+
+    @staticmethod
+    def _generate_namespace():
+        """
+        Generate an LSID namespace based off Jupyter user or system user
+        :return: string
+        """
+        raw_namespace = None
+
+        # Get the Jupyter user, if available
+        try:
+            raw_namespace = os.environ['JPY_USER']
+        except KeyError:
+            pass
+
+        # Otherwise get the current user
+        if raw_namespace is None or raw_namespace == '':
+            raw_namespace = getpass.getuser()
+
+        # Remove illegal characters and return
+        return re.sub(r'[^\w.-]', '-', raw_namespace)
+
+    @staticmethod
+    def _generate_domain():
+        """
+        Generate an LSID domain based off a setting file or the hostname
+        :return: string
+        """
+
+        # Check for LSID domain setting file
+        try:
+            user_dir = str(pathlib.Path.home())
+            jupyter_dir = os.path.join(user_dir, '.jupyter')
+            domain_path = os.path.join(jupyter_dir, 'lsid_domain')
+            with open(domain_path, 'r') as domain_file:
+                domain = str(domain_file.read()).strip()
+            if domain is not None and domain != '':
+                return domain
+        except:
+            # Ignore exceptions, simply fall back to the domain name
+            pass
+
+        # If this fails, return the fully qualified domain name
+        return socket.getfqdn()
+
+    def _generate_base_lsid(self):
+        """
+        Generates and returns a base LSID
+        :return:
+        """
+        domain = self._generate_domain()
+        namespace = self._generate_namespace()
+
+        # Return the base LSID
+        return "urn:lsid:" + domain + ":" + namespace
+
+    def _create_blank_authority(self):
+        """
+        Returns a dictionary structure representing a blank LSID authority file
+        :return: dict
+        """
+        return {
+            'base_lsid': self._generate_base_lsid(),
+            'module_count': 0,
+            'registered_modules': {},
+        }
+
+    def _create_authority_file(self, file_path):
+        """
+        Create a new LSID authority file at the indicated location
+        :param file_path: location of LSID authority file
+        """
+        parent_dir = os.path.dirname(os.path.realpath(file_path))
+
+        # Create the parent directory if it does not exist
+        if not os.path.exists(parent_dir):
+            os.makedirs(parent_dir)
+
+        # Create blank LSID authority structure
+        blank = self._create_blank_authority()
+
+        # Write blank structure to new authority file
+        with open(file_path, 'w+') as authority_file:
+            json.dump(blank, authority_file, sort_keys=True, indent=4, separators=(',', ': '))
+
+    def _load_lsid_authority(self):
+        """
+        Load (or reload) the LSID authority file and set class attributes
+        """
+        authority_file = open(self.authority, 'r')
+        authority_json = json.load(authority_file)
+        authority_file.close()
+        self.base_lsid = authority_json['base_lsid']
+        self.module_count = int(authority_json['module_count'])
+        self.registered_modules = authority_json['registered_modules']
+
+    def _next_lsid_number(self):
+        """
+        Return a string representing the next module number for this LSID authority
+        :return:
+        """
+        if self.module_count is None:
+            raise Exception("Module count in LSID authority not initialized")
+
+        return str(self.module_count+1).zfill(4)
+
+    def _assemble_lsid(self, module_number):
+        """
+        Return an assembled LSID based off the provided module number and the authority's base LSID.
+        Note: Never includes the module's version number.
+        :param module_number:
+        :return: string
+        """
+        if self.base_lsid is None:
+            raise Exception("Base LSID in LSID authority not initialized")
+
+        return self.base_lsid + ":" + str(module_number)
+
+    def lsid(self):
+        """
+        Acquire a new LSID assigned by the LSID authority
+        :return: string - assigned LSID
+        """
+        return self._assemble_lsid(self._next_lsid_number())
+
+    def register(self, task_spec):
+        """
+        Registers a module specification with the LSID authority.
+        Validates that it possesses an LSID assigned by the authority.
+        Raises an exception if registration wasn't successful.
+        :param task_spec:
+        :return: boolean - True if registration was successful
+        """
+        if self.validate(task_spec.lsid):
+            # Add the module name to the map
+            self.registered_modules[task_spec.lsid] = task_spec.name
+
+            # Increment module count
+            self.module_count += 1
+
+            # Write the updated LSID authority file and reload
+            with open(self.authority, 'w') as authority_file:
+                json.dump({
+                    'base_lsid': self.base_lsid,
+                    'module_count': self.module_count,
+                    'registered_modules': self.registered_modules,
+                }, authority_file, sort_keys=True, indent=4, separators=(',', ': '))
+            self._load_lsid_authority()
+        else:
+            raise RuntimeError("Module LSID id not valid: " + str(task_spec.lsid))
+
+        return True
+
+    def validate(self, lsid, check_existing=True):
+        """
+        Validates an LSID with the LSID authority.
+        :param lsid:
+        :return: boolean - is the LSID valid with this authority?
+        """
+        # Base LSID matches
+        if not lsid.startswith(self.base_lsid):
+            return False
+
+        # Module number isn't already taken
+        if check_existing and lsid in self.registered_modules:
+            return False
+
+        # Everything checks out, return True
+        return True
+
+    def lookup(self, lsid):
+        """
+        Look up the name of a module by LSID assigned by the authority.
+        Returns None if the LSID is not found.
+        :param lsid:
+        :return: string or none
+        """
+        if self.registered_modules is None or lsid not in self.registered_modules:
+            return None
+        else:
+            return self.registered_modules[lsid]
