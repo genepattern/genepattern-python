@@ -1,3 +1,8 @@
+__authors__ = ['Thorin Tabor']
+__copyright__ = 'Copyright 2016, Broad Institute'
+__version__ = '0.1.0'
+__status__ = 'Beta'
+
 """
 GenePattern Data Tools
 
@@ -16,11 +21,6 @@ if sys.version_info.major == 2:
     import urllib2
 else:
     import urllib.request as urllib2
-
-
-__authors__ = ['Thorin Tabor']
-__version__ = '0.1.0'
-__status__ = 'Beta'
 
 
 class GCT(object):
