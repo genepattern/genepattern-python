@@ -178,6 +178,34 @@ class GPServer(object):
                         break
             wait = min(wait * 2, 10)
 
+    def get_recent_jobs(self, n_jobs=10):
+        """
+        Returns the user's N most recently submitted jobs on the GenePattern server.
+
+        Args: If not specified, n_jobs = 10.
+
+        Returns: An array of GPJob objects.
+        """
+
+        # Query the server for the list of jobs
+        request = urllib2.Request(self.url + '/rest/v1/jobs/?pageSize=' + str(n_jobs) + '&userId=' + str(parse.quote(self.username)) + '&orderBy=-dateSubmitted')
+        if self.authorization_header() is not None:
+            request.add_header('Authorization', self.authorization_header())
+        request.add_header('User-Agent', 'GenePatternRest')
+        response = urllib2.urlopen(request)
+        response_string = response.read().decode('utf-8')
+        response_json = json.loads(response_string)
+
+        # For each job in the JSON Array, build a GPJob object and add to the job list
+        job_list = []
+        for job_json in response_json['items']:
+            job_id = job_json['jobId']
+            job = GPJob(self, job_id)
+            job.info = job_json
+            job.load_info()
+            job_list.append(job)
+
+        return job_list
 
 class GPResource(object):
     """

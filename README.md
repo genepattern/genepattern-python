@@ -4,7 +4,7 @@ This is a Python library for working with GenePattern programmatically. Calls fr
 
 ## Supported Versions
 
-This library supports Python 2.7 and Python 3.3+. The bundled GCT Tools require [pandas](http://pandas.pydata.org/), although the rest of the features do not.
+This library supports Python 2.7 and Python 3.3+. The bundled data submodule `gp.data` requires [pandas](http://pandas.pydata.org/), although the rest of the features do not.
 
 ## Installing
 
