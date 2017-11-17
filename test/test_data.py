@@ -3,8 +3,7 @@ Tests for loading GCT and ODF files into pandas dataframes
 """
 
 
-import gp
-import gp.data
+from .. import gp
 
 
 def test_gct_load_gpfile():
