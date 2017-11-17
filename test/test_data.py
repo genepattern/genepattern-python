@@ -17,7 +17,7 @@ else:
 @pytest.fixture(scope="session", autouse=True)
 def before_tests(request):
     # Download files for local use
-    urllib2.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
+    urllib2.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
                                "all_aml_test.preprocessed.comp.marker.odf")
 
     # Clean up after ourselves
