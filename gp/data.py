@@ -92,82 +92,6 @@ def ODF(odf_obj):
     except Exception:
         raise TypeError('Error parsing ODF file')
 
-    ############################
-    # Shared Utility Functions #
-    ############################
-
-
-    def _is_url(url):
-        """
-        Used to determine if a given string represents a URL
-        """
-        regex = re.compile(
-            r'^(?:http|ftp)s?://'  # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-        if regex.match(url) is not None:
-            return True
-        else:
-            return False
-
-    def _apply_backwards_compatibility(df):
-        """
-        Attach properties to the Dataframe to make it backwards compatible with older versions of this library
-
-        :param df: The dataframe to be modified
-        """
-        df.row_count = types.MethodType(lambda self: len(self.index), df)
-        df.col_count = types.MethodType(lambda self: len(self.columns), df)
-        df.dataframe = df
-
-    def _obtain_io(init_obj):
-        io_obj = None
-
-        # Check to see if init_obj is a GPFile object from the GenePattern Python Client
-        if isinstance(init_obj, gp.GPFile):
-            io_obj = init_obj.open()
-
-        # Check to see if init_obj is a file-like object
-        # Skip if a file-like object has already been obtained
-        if hasattr(init_obj, 'read') and io_obj is None:
-            io_obj = init_obj
-
-        # Check to see if gct_obj is a string
-        # Skip if a file-like object has already been obtained
-        if isinstance(init_obj, str) and io_obj is None:
-
-            # Check to see if the string contains multiple lines
-            # If it does, it is likely raw data
-            if '\n' in init_obj:
-                # Wrap the raw data in a StringIO (file-like object)
-                io_obj = io.StringIO(init_obj)
-
-            # Check to see if the string contains a URL
-            # Skip if a file-like object has already been obtained
-            if _is_url(init_obj) and io_obj is None:
-                io_obj = urllib.request.urlopen(init_obj)
-
-            # Otherwise try treating the string as a file path
-            # If this doesn't work throw an error, we don't know what to do with this string.
-            # Skip if a file-like object has already been obtained
-            if io_obj is None:
-                try:
-                    # Point gct_obj to file (read in the code below)
-                    io_obj = open(init_obj, 'r')
-                except IOError:
-                    raise IOError('Input string not determined to be raw data, URL or readable file.')
-
-        # If we still don't have a file-like object at this point, throw an error
-        if io_obj is None:
-            raise TypeError('Unknown type passed to GCT() or ODF()')
-
-        # Return the io_obj
-        return io_obj
-
-
 ############################
 # Shared Utility Functions #
 ############################
@@ -205,6 +129,7 @@ def _is_url(url):
     else:
         return False
 
+
 def _apply_backwards_compatibility(df):
     """
     Attach properties to the Dataframe to make it backwards compatible with older versions of this library
@@ -214,6 +139,7 @@ def _apply_backwards_compatibility(df):
     df.row_count = types.MethodType(lambda self: len(self.index), df)
     df.col_count = types.MethodType(lambda self: len(self.columns), df)
     df.dataframe = df
+
 
 def _obtain_io(init_obj):
     io_obj = None
