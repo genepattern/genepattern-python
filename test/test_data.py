@@ -3,6 +3,10 @@ Tests for loading GCT and ODF files into pandas dataframes
 """
 
 
+import gp
+import gp.data
+
+
 def test_gct_load_gpfile():
     assert True
 
@@ -32,7 +36,8 @@ def test_odf_load_file():
 
 
 def test_odf_load_url():
-    assert True
+    odf = gp.data.ODF('https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf')
+    odf_asserts(odf)
 
 
 def test_odf_load_path():
@@ -41,3 +46,8 @@ def test_odf_load_path():
 
 def test_odf_load_string():
     assert True
+
+
+def odf_asserts(odf):
+    assert odf.model is not None
+    assert odf.headers is not None
