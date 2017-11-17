@@ -5,20 +5,14 @@ import pytest
 
 import gp
 import gp.data
-import sys
-
-# Imports requiring compatibility between Python 2 and Python 3
-if sys.version_info.major == 2:
-    import urllib
-else:
-    import urllib.request as urllib
+import urllib.request
 
 
 @pytest.fixture(scope="session", autouse=True)
 def before_tests(request):
     # Download files for local use
-    urllib.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct", "all_aml_test.gct")
-    urllib.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
+    urllib.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct", "all_aml_test.gct")
+    urllib.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
                                "all_aml_test.preprocessed.comp.marker.odf")
 
     # Clean up after ourselves

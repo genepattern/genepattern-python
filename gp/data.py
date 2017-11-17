@@ -9,21 +9,15 @@ GenePattern Data Tools
 Tools for loading GenePattern data files (such as GCT or ODF files) and
 working with their contents in a Pandas DataFrame.
 
-Compatible with Python 2.7 and Python 3.4+
+Compatible with Python 3.4+
 """
 
 import gp
 import re
-import sys
 import io
 import types
 import pandas as pd
-
-# Imports requiring compatibility between Python 2 and Python 3
-if sys.version_info.major == 2:
-    import urllib2
-else:
-    import urllib.request as urllib2
+import urllib.request
 
 
 def GCT(gct_obj):
@@ -267,17 +261,13 @@ def _obtain_io(init_obj):
         # Check to see if the string contains multiple lines
         # If it does, it is likely raw data
         if '\n' in init_obj:
-            # Handle Python2 implementation of strings vs unicode
-            if sys.version_info.major == 2:
-                init_obj = unicode(init_obj)
-
             # Wrap the raw data in a StringIO (file-like object)
             io_obj = io.StringIO(init_obj)
 
         # Check to see if the string contains a URL
         # Skip if a file-like object has already been obtained
         if _is_url(init_obj) and io_obj is None:
-            io_obj = urllib2.urlopen(init_obj)
+            io_obj = urllib.request.urlopen(init_obj)
 
         # Otherwise try treating the string as a file path
         # If this doesn't work throw an error, we don't know what to do with this string.
