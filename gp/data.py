@@ -53,14 +53,15 @@ def ODF(odf_obj):
     :odf_obj: The ODF file. Accepts a file-like object, a file path, a URL to the file
               or a string containing the raw data.
     """
-    headers = None
-    model = None
 
     # Handle all the various initialization types and get an IO object
     odf_io = _obtain_io(odf_obj)
 
     # Read the file as an array of lines
     raw_lines = odf_io.readlines()
+
+    # Convert byte strings to unicode strings
+    raw_lines = _bytes_to_str(raw_lines)
 
     try:
         # Read the header count
@@ -72,7 +73,7 @@ def ODF(odf_obj):
         # Read the model
         model = _extract_model(headers)
 
-        # Read the column names
+        # Read the column names, if available
         column_names = _extract_column_names(headers)
 
         # Assemble the data
@@ -115,11 +116,20 @@ def _apply_odf_properties(df, headers, model):
     df.model = model
 
 
+def _bytes_to_str(lines):
+    """
+    Convert all lines from byte string to unicode string, if necessary
+    """
+    if len(lines) >= 1 and hasattr(lines[0], 'decode'):
+        return [line.decode('utf-8') for line in lines]
+    else:
+        return lines
+
+
 def _extract_header_value(line):
     """
     Extracts a key / value pair from a header line in an ODF file
     """
-    line = line.decode("UTF-8").strip()
 
     # Skip blank lines, returning None
     if not line:
@@ -144,8 +154,11 @@ def _extract_column_names(headers):
     """
     Return an array containing the column names, extracted from the headers
     """
-    name_string = headers['COLUMN_NAMES']
-    return name_string.split('\t')
+    if 'COLUMN_NAMES' in headers:
+        name_string = headers['COLUMN_NAMES']
+        return name_string.split('\t')
+    else:
+        return None
 
 
 def _extract_model(headers):
@@ -191,13 +204,15 @@ def count_header_blanks(lines, count):
             blanks += 1
     return blanks
 
+
 def _join_data_lines(lines, skip):
     """
     Join all the data lines into a byte string
     """
+    lines = list(map(str.strip, lines))
     blank_lines = count_header_blanks(lines, skip)
     body = lines[skip + blank_lines + 2:]
-    return b''.join(body).decode('UTF-8')
+    return '\n'.join(body)
 
 
 ############################
@@ -236,7 +251,7 @@ def _apply_backwards_compatibility(df):
 def _obtain_io(init_obj):
     io_obj = None
 
-    # Check to see if init_obj if a GPFile object from the GenePattern Python Client
+    # Check to see if init_obj is a GPFile object from the GenePattern Python Client
     if isinstance(init_obj, gp.GPFile):
         io_obj = init_obj.open()
 

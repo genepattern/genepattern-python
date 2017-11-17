@@ -10,4 +10,3 @@ Compatible with Python 2.7 and Python 3.4+
 """
 
 from .core import GPException, GPFile, GPJob, GPJobSpec, GPResource, GPServer, GPTask, GPTaskParam
-from . import data
