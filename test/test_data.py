@@ -5,14 +5,19 @@ import pytest
 
 import gp
 import gp.data
-import urllib.request
-import os
+import sys
+
+# Imports requiring compatibility between Python 2 and Python 3
+if sys.version_info.major == 2:
+    import urllib2
+else:
+    import urllib.request as urllib2
 
 
 @pytest.fixture(scope="session", autouse=True)
 def before_tests(request):
     # Download files for local use
-    urllib.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
+    urllib2.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
                                "all_aml_test.preprocessed.comp.marker.odf")
 
     # Clean up after ourselves
@@ -40,11 +45,16 @@ def test_gct_load_string():
 
 
 def test_odf_load_gpfile():
-    assert True
+    gpfile = gp.GPFile(gp.GPServer('http://genepattern.broadinstitute.org/gp', '', ''),
+                       'https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf')
+    odf = gp.data.ODF(gpfile)
+    odf_asserts(odf)
 
 
 def test_odf_load_file():
-    assert True
+    file = open('all_aml_test.preprocessed.comp.marker.odf', 'r')
+    odf = gp.data.ODF(file)
+    odf_asserts(odf)
 
 
 def test_odf_load_url():
@@ -58,7 +68,10 @@ def test_odf_load_path():
 
 
 def test_odf_load_string():
-    assert True
+    with open('all_aml_test.preprocessed.comp.marker.odf', 'r') as file:
+        file_str = file.read()
+    odf = gp.data.ODF(file_str)
+    odf_asserts(odf)
 
 
 def after_tests():
