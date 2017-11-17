@@ -9,15 +9,16 @@ import sys
 
 # Imports requiring compatibility between Python 2 and Python 3
 if sys.version_info.major == 2:
-    import urllib2
+    import urllib
 else:
-    import urllib.request as urllib2
+    import urllib.request as urllib
 
 
 @pytest.fixture(scope="session", autouse=True)
 def before_tests(request):
     # Download files for local use
-    urllib2.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
+    urllib.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct", "all_aml_test.gct")
+    urllib.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
                                "all_aml_test.preprocessed.comp.marker.odf")
 
     # Clean up after ourselves
@@ -25,23 +26,33 @@ def before_tests(request):
 
 
 def test_gct_load_gpfile():
-    assert True
+    gpfile = gp.GPFile(gp.GPServer('http://genepattern.broadinstitute.org/gp', '', ''),
+                       'https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct')
+    gct = gp.data.GCT(gpfile)
+    gct_asserts(gct)
 
 
 def test_gct_load_file():
-    assert True
+    file = open('all_aml_test.gct', 'r')
+    gct = gp.data.GCT(file)
+    gct_asserts(gct)
 
 
 def test_gct_load_url():
-    assert True
+    gct = gp.data.GCT('https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct')
+    gct_asserts(gct)
 
 
 def test_gct_load_path():
-    assert True
+    gct = gp.data.GCT('all_aml_test.gct')
+    gct_asserts(gct)
 
 
 def test_gct_load_string():
-    assert True
+    with open('all_aml_test.gct', 'r') as file:
+        file_str = file.read()
+    gct = gp.data.GCT(file_str)
+    gct_asserts(gct)
 
 
 def test_odf_load_gpfile():
@@ -81,6 +92,11 @@ def after_tests():
 #####################
 # Utility functions #
 #####################
+
+
+def gct_asserts(odf):
+    assert odf.row_count()
+    assert odf.col_count()
 
 
 def odf_asserts(odf):
