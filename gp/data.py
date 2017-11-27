@@ -97,6 +97,28 @@ def ODF(odf_obj):
 ############################
 
 
+def write_odf(df, file_path, headers=None):
+    """
+    Writes the provided DataFrame to a ODF file.
+
+    Assumes that the DataFrame matches the structure of those produced
+    by the ODF() function in this library
+
+    :param df: the DataFrame to write to ODF
+    :param file_path: path to which to write the ODF file
+    :param headers: A dict of ODF headers, if none are provided will attempt to read them from the ODF file
+    :return:
+    """
+    if headers is None and hasattr(df, 'headers'):
+        headers = df.headers
+    else:
+        raise AttributeError('ODF headers not provided')
+
+    with open(file_path, 'w') as file:
+        file.write(_header_dict_to_str(headers))
+        df.to_csv(file, sep='\t', header=False, index=False, mode='w+')
+
+
 def write_gct(df, file_path):
     """
     Writes the provided DataFrame to a GCT file.
@@ -189,6 +211,41 @@ def _obtain_io(init_obj):
 #########################
 # ODF Utility Functions #
 #########################
+
+
+def _header_dict_to_str(headers):
+    # Define the list of headers to handle as special cases
+    special = ['HeaderLines', 'COLUMN_NAMES', 'COLUMN_TYPES', 'Model', 'DataLines']
+
+    # Add the initial ODF version line
+    combined = 'ODF 1.0\n'
+
+    # Add HeaderLines
+    combined += 'HeaderLines=' + str(len(headers)) + '\n'
+
+    # Add column names, if available
+    if 'COLUMN_NAMES' in headers:
+        combined += 'COLUMN_NAMES:' + str(headers['COLUMN_NAMES']) + '\n'
+
+    # Add column types, if available
+    if 'COLUMN_TYPES' in headers:
+        combined += 'COLUMN_TYPES:' + str(headers['COLUMN_TYPES']) + '\n'
+
+    # Add model, if available
+    if 'Model' in headers:
+        combined += 'Model=' + str(headers['Model']) + '\n'
+
+    # Add remaining headers
+    for key, value in sorted(headers.items()):
+        if key not in special:
+            combined += str(key) + '=' + str(value) + '\n'
+
+    # Add data lines, if available
+    if 'DataLines' in headers:
+        combined += 'DataLines=' + str(headers['DataLines']) + '\n'
+
+    # Return the combined header string
+    return combined
 
 
 def _apply_odf_properties(df, headers, model):
