@@ -4,23 +4,25 @@
 
 # GenePattern Python Library
 
-This is a Python library for working with GenePattern programmatically. Calls from this library execute the GenePattern REST API.
+This is a Python library for working with GenePattern programmatically. Behind the scenes, calls from this library execute the GenePattern REST API.
 
-## Supported Versions
+## Supported Python Versions
 
-This library supports Python 2.7 and Python 3.4+. The bundled data submodule `gp.data` requires [pandas](http://pandas.pydata.org/) and Python 3, although the rest of the module does not.
+This library requires Python 3.4+. The bundled data submodule `gp.data` also requires [pandas](http://pandas.pydata.org/), although the rest of the module does not.
+
+**Python 2 Support:** Support for Python 2 was removed in version 1.4.0. Python 2 users should use version 1.3.1.
 
 ## Installing
 
 It is recommended to install this library from PIP. Simply execute the command below:
 
-> sudo pip install genepattern-python
+> pip install genepattern-python
 
 ## Upgrading
 
 To upgrade to the latest version of the library, execute the command below:
 
-> sudo pip install genepattern-python --upgrade
+> pip install genepattern-python --upgrade
 
 ## Tutorial
 

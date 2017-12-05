@@ -3,7 +3,7 @@ GenePattern Module Creator
 
 Tools for converting Python scripts into GenePattern server modules
 
-Compatible with Python 2.7 and Python 3.4+
+Compatible with Python 3.4+
 """
 import getpass
 import json
@@ -21,7 +21,7 @@ from gp import GPServer
 
 __authors__ = ['Thorin Tabor']
 __version__ = '0.2.0'
-__status__ = 'Beta'
+__status__ = 'Alpha'
 
 
 class StringEnum(str, Enum):
