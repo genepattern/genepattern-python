@@ -1,5 +1,5 @@
 [![Version](https://img.shields.io/pypi/v/genepattern-python.svg)](https://pypi.python.org/pypi/genepattern-python)
-[![Build](https://travis-ci.org/genepattern/genepattern-python.svg?branch=master)](https://travis-ci.org/genepattern/genepattern-python.svg?branch=master)
+[![Build](https://travis-ci.org/genepattern/genepattern-python.svg?branch=master)](https://travis-ci.org/genepattern/genepattern-python)
 [![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://github.com/genepattern/example-notebooks/blob/master/GenePattern%20Python%20Tutorial.ipynb)
 
 # GenePattern Python Library
