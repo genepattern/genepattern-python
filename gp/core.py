@@ -87,7 +87,7 @@ class GPServer(object):
 
         # names should be a list of names,
         # values should be a list of **lists** of values
-        json_string = json.dumps({'lsid': job_spec.lsid, 'params': job_spec.params, 'tags': ['GenePattern Python Client']})
+        json_string = json.dumps({'lsid': job_spec.lsid, 'params': job_spec.params, 'tags': ['GenePattern Python Client']}, cls=GPJSONEncoder)
         if sys.version_info.major == 3:  # Handle conversion to bytes for Python 3
             json_string = bytes(json_string, 'utf-8')
         request = urllib.request.Request(self.url + '/rest/v1/jobs')
@@ -245,6 +245,9 @@ class GPFile(GPResource):
         Returns the file name of the output file
         """
         return urllib.parse.unquote(self.get_url().split('/')[-1])
+
+    def __str__(self):
+        return self.uri
 
 
 class GPJob(GPResource):
@@ -831,3 +834,14 @@ class GPException(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+class GPJSONEncoder(json.JSONEncoder):
+    """
+    Custom JSON encoder for encoding GenePattern classes
+    """
+    def default(self, o):
+        if isinstance(o, GPFile):
+            return o.get_url()
+
+        return {'__{}__'.format(o.__class__.__name__): o.__dict__}

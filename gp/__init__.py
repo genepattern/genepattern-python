@@ -9,4 +9,4 @@ GenePattern Python Client
 Compatible with Python 3.4+
 """
 
-from .core import GPException, GPFile, GPJob, GPJobSpec, GPResource, GPServer, GPTask, GPTaskParam
+from .core import GPException, GPFile, GPJob, GPJobSpec, GPResource, GPServer, GPTask, GPTaskParam, GPJSONEncoder
