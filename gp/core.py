@@ -52,7 +52,8 @@ class GPServer(object):
         if self.authorization_header() is not None:
             request.add_header('Authorization', self.authorization_header())
         request.add_header('User-Agent', 'GenePatternRest')
-        data = open(file_path, 'rb').read()
+        with open(file_path, 'rb') as f:
+            data = f.read()
 
         try:
             response = urllib.request.urlopen(request, data)
