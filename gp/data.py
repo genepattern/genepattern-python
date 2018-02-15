@@ -18,8 +18,6 @@ import io
 import types
 import pandas as pd
 import urllib.request
-import numpy as np
-import sklearn.cluster
 
 
 def GCT(gct_obj):
@@ -391,6 +389,9 @@ def extract_classes(list_of_strings, number_of_classes=2, affinity='euclidean'):
     Adapted from here:
     https://stats.stackexchange.com/questions/123060/clustering-a-long-list-of-strings-words-into-similarity-groups
     """
+    import numpy as np
+    import sklearn.cluster
+
     words = np.asarray(list_of_strings)  # So that indexing with a list will work
     lev_similarity = -1 * np.array([[minimumEditDistance(w1, w2) for w1 in words] for w2 in words])
     affprop = sklearn.cluster.AffinityPropagation(affinity="precomputed", damping=0.5)
@@ -423,6 +424,8 @@ def strlist2num(str_list):
     """
     Take a list of strings to correlative numbers
     """
+    import numpy as np
+
     classes = np.unique(str_list)
     num_list = []
     #     print(classes)
@@ -443,6 +446,8 @@ def list2cls(input_list, name_of_out='output.cls', sep='\t'):
     This function creates a CLS file from a list-like object
     Copied and modified from Cuzcatlan
     """
+    import numpy as np
+
     cls = open(name_of_out, 'w')
     cls.write("{}{}{}{}1\n".format(len(input_list), sep, len(np.unique(input_list)), sep))
     cls.write("#{}{}\n".format(sep, sep.join(np.unique(input_list).astype(str))))
@@ -457,6 +462,8 @@ def make_cls(df, name, classes=None, case_sensitive=False, sep='\t'):
     """
     This function creates a CLS file from the column names of a GCT file
     """
+    import numpy as np
+
     if classes is None:
         classes = extract_classes(list(df.columns))
 
