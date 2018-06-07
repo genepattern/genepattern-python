@@ -4,7 +4,7 @@
 2. cd to *genepattern-python* directory
 3. Upload via *python setup.py sdist upload -r pypitest*
 4. If the upload fails go to https://testpypi.python.org/pypi and manually upload dist/genepattern-python-*.tar.gz
-5. Test the deploy by uninstalling and reinstalling the package: *sudo pip uninstall genepattern-python* and *sudo pip install -i https://testpypi.python.org/pypi genepattern-python* .
+5. Test the deploy by uninstalling and reinstalling the package: *sudo pip uninstall genepattern-python* and *sudo pip install --index-url https://test.pypi.org/simple/ genepattern-python* .
 
 # How to Deploy to Production PyPi
 
