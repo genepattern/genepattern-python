@@ -525,6 +525,7 @@ class GPTask(GPResource):
     params = None
     dto = None
 
+    _params_loaded = False
     submit_json = None
     job_spec = None
     job = None
@@ -569,6 +570,7 @@ class GPTask(GPResource):
         self.params = []
         for param in self.dto['params']:
             self.params.append(GPTaskParam(self, param))
+        self._params_loaded = True
 
     def get_lsid(self):
         """
@@ -605,6 +607,10 @@ class GPTask(GPResource):
         """
         :return: Returns a GPJobSpec used to launch a job of this task type
         """
+        # If the parameters haven't been loaded yet, do so
+        if not self._params_loaded:
+            self.param_load()
+
         return GPJobSpec(self.server_data, self.lsid)
 
 

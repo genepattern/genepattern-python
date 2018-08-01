@@ -2,7 +2,7 @@ from distutils.core import setup
 
 
 # Read version and other metadata from file
-__version__ = '1.5.0.RC4'
+__version__ = '1.4.2'
 
 setup(
     name='genepattern-python',

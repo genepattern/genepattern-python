@@ -8,7 +8,7 @@ Compatible with Python 3.4+
 
 __authors__ = ['Thorin Tabor', 'Chet Birger']
 __copyright__ = 'Copyright 2014-2018, Regents of the University of California & Broad Institute'
-__version__ = '1.5.0.RC4'
+__version__ = '1.4.2'
 __status__ = 'Production'
 
 # Import core functionality
