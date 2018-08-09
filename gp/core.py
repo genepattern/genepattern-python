@@ -608,7 +608,7 @@ class GPTask(GPResource):
         :return: Returns a GPJobSpec used to launch a job of this task type
         """
         # If the parameters haven't been loaded yet, do so
-        if not self._params_loaded:
+        if not self._params_loaded and self.server_data is not None:
             self.param_load()
 
         return GPJobSpec(self.server_data, self.lsid)
