@@ -23,7 +23,7 @@ class GPServer(object):
         self.last_job = None
 
     def __str__(self):
-        return self.url + ' ' + self.username + ' ' + self.password
+        return self.url + ' ' + self.username
 
     def authorization_header(self):
         """
