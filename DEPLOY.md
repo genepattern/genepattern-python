@@ -10,7 +10,7 @@
 
 1. First deploy to test and ensure everything is working correctly (see above).
 2. cd to *genepattern-python* directory
-3. Upload via *python setup.py sdist upload*
+3. Upload via python setup.py sdist bdist_wheel; twine upload dist/*
 4. If the upload fails go to https://pypi.python.org/pypi and manually upload dist/genepattern-python-*.tar.gz
 5. Test the deploy by uninstalling and reinstalling the package: *sudo pip uninstall genepattern-python* and *sudo pip install genepattern-python* .
 

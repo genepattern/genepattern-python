@@ -1,13 +1,18 @@
-from distutils.core import setup
+from setuptools import setup
 
 
 # Read version and other metadata from file
-__version__ = '1.4.3'
+__version__ = '1.4.5.post1'
+
+with open('README.md') as f:
+    long_description = f.read()
 
 setup(
     name='genepattern-python',
     packages=['gp'],
     version=__version__,
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     description='Library for programmatically interacting with GenePattern from Python.',
     author='Thorin Tabor',
     author_email='tmtabor@cloud.ucsd.edu',
