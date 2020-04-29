@@ -37,6 +37,51 @@ def GCT(gct_obj):
     return df
 
 
+class CLS:
+    def __init__(self, cls_obj):
+        """
+        Create a CLS object with the contents of a CLS file
+
+        For more information on the CLS format see:
+        http://software.broadinstitute.org/cancer/software/genepattern/file-formats-guide
+
+        :cls_obj: The CLS file. Accepts a file-like object, a file path, a URL to the file
+                  or a string containing the raw data.
+        """
+
+        hdr_line_re = re.compile("^(?P<samples>[0-9]+)\s+(?P<classes>[0-9]+)\s+1\s*$")
+        assign_line_re = re.compile("^\s*(?:\d+\s+)*\d+\s*$",re.ASCII)
+
+        # Handle all the various initialization types and get an IO object
+        cls_io = _obtain_io(cls_obj)
+
+        # Read the file as an array of lines
+        raw_lines = cls_io.readlines()
+
+        # Convert byte strings to unicode strings
+        raw_lines = _bytes_to_str(raw_lines)
+
+        # Validate cls file format and contents
+        hdr_line_match = re.match(hdr_line_re, raw_lines[0])
+        if hdr_line_match:
+            (self.num_samples, self.num_classes) = (int(hdr_line_match["samples"]), int(hdr_line_match["classes"]))
+
+            self.class_names = raw_lines[1].split()[1:]
+            if len(self.class_names) != self.num_classes:
+                raise ValueError("Mismatch in {0} between number of class names declared ({1}) and number provided ({2})".format(cls_obj, self.num_classes, len(self.class_names)))
+
+        else:
+            raise ValueError("Bad format in {0} for header line: {1}".format(cls_obj, raw_lines[0]))
+
+        assign_line_match = re.match(assign_line_re, raw_lines[2])
+        if assign_line_match:
+            self.class_assignments = [int(i) for i in raw_lines[2].split()]
+            if self.num_samples != len(self.class_assignments):
+                raise ValueError("Mismatch in {0} between number of samples declared ({1}) and number of class assignments provided ({2})".format(cls_obj, self.num_samples, len(self.class_assignments)))
+        else:
+            raise ValueError("Bad format in {0} for class assignment line: {1}".format(cls_obj, raw_lines[2]))
+
+
 def ODF(odf_obj):
     """
     Create a Dataframe with the contents of the ODF file
