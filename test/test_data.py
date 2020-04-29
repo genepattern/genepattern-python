@@ -11,8 +11,8 @@ import urllib.request
 @pytest.fixture(scope="session", autouse=True)
 def before_tests(request):
     # Download files for local use
-    urllib.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct", "all_aml_test.gct")
-    urllib.request.urlretrieve("https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf",
+    urllib.request.urlretrieve("https://datasets.genepattern.org/data/all_aml/all_aml_test.gct", "all_aml_test.gct")
+    urllib.request.urlretrieve("https://datasets.genepattern.org/data/all_aml/all_aml_test.preprocessed.comp.marker.odf",
                                "all_aml_test.preprocessed.comp.marker.odf")
 
     # Clean up after ourselves
@@ -21,7 +21,7 @@ def before_tests(request):
 
 def test_gct_load_gpfile():
     gpfile = gp.GPFile(gp.GPServer('http://genepattern.broadinstitute.org/gp', '', ''),
-                       'https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct')
+                       'https://datasets.genepattern.org/data/all_aml/all_aml_test.gct')
     gct = gp.data.GCT(gpfile)
     gct_asserts(gct)
 
@@ -33,7 +33,7 @@ def test_gct_load_file():
 
 
 def test_gct_load_url():
-    gct = gp.data.GCT('https://software.broadinstitute.org/cancer/software/genepattern/data/all_aml/all_aml_test.gct')
+    gct = gp.data.GCT('https://datasets.genepattern.org/data/all_aml/all_aml_test.gct')
     gct_asserts(gct)
 
 
@@ -51,7 +51,7 @@ def test_gct_load_string():
 
 def test_odf_load_gpfile():
     gpfile = gp.GPFile(gp.GPServer('http://genepattern.broadinstitute.org/gp', '', ''),
-                       'https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf')
+                       'https://datasets.genepattern.org/data/all_aml/all_aml_test.preprocessed.comp.marker.odf')
     odf = gp.data.ODF(gpfile)
     odf_asserts(odf)
 
@@ -63,7 +63,7 @@ def test_odf_load_file():
 
 
 def test_odf_load_url():
-    odf = gp.data.ODF('https://software.broadinstitute.org/cancer/software/genepattern/data/protocols/all_aml_test.preprocessed.comp.marker.odf')
+    odf = gp.data.ODF('https://datasets.genepattern.org/data/all_aml/all_aml_test.preprocessed.comp.marker.odf')
     odf_asserts(odf)
 
 
