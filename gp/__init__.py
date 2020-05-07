@@ -7,8 +7,8 @@ Compatible with Python 3.4+
 """
 
 __authors__ = ['Thorin Tabor', 'Chet Birger']
-__copyright__ = 'Copyright 2014-2019, Regents of the University of California & Broad Institute'
-__version__ = '1.4.5.post1'
+__copyright__ = 'Copyright 2014-2020, Regents of the University of California & Broad Institute'
+__version__ = '20.05'
 __status__ = 'Production'
 
 # Import core functionality

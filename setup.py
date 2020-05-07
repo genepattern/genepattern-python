@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 # Read version and other metadata from file
-__version__ = '1.4.5.post1'
+__version__ = '20.05'
 
 with open('README.md') as f:
     long_description = f.read()
