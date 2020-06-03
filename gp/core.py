@@ -656,7 +656,7 @@ class GPTaskParam(object):
         Returns whether the parameter is optional or required
         :return: Return True if optional, False if required
         """
-        if (('optional' in self.attributes and bool(self.attributes['optional'].strip())) and
+        if (('optional' in self.attributes and bool(self.attributes['optional'].strip())) or
                 ('minValue' in self.attributes and self.attributes['minValue'] == 0)):
             return True
         else:
