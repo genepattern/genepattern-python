@@ -704,8 +704,9 @@ class GPTaskParam(object):
         :return: Return True if the parameter allows multiple values, otherwise False
         """
         # note that maxValue means "max number of values", and is an integer, not a string
-        if (('maxValue' in self.attributes) and
-                (self.attributes['maxValue'] > 1)):
+        if ('maxValue' in self.attributes) and (self.attributes['maxValue'] > 1):
+            return True
+        elif ('numValues' in self.attributes) and ('+' in self.attributes['numValues']):
             return True
         else:
             return False
