@@ -8,6 +8,9 @@ import urllib.request
 import urllib.parse
 
 
+GP_JOB_TAG = 'GenePattern Python Client'
+
+
 class GPServer(object):
     """
     Wrapper for data needed to make server calls.
@@ -88,7 +91,7 @@ class GPServer(object):
 
         # names should be a list of names,
         # values should be a list of **lists** of values
-        json_string = json.dumps({'lsid': job_spec.lsid, 'params': job_spec.params, 'tags': ['GenePattern Python Client']}, cls=GPJSONEncoder)
+        json_string = json.dumps({'lsid': job_spec.lsid, 'params': job_spec.params, 'tags': [GP_JOB_TAG]}, cls=GPJSONEncoder)
         if sys.version_info.major == 3:  # Handle conversion to bytes for Python 3
             json_string = bytes(json_string, 'utf-8')
         request = urllib.request.Request(self.url + '/rest/v1/jobs')
