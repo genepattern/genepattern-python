@@ -336,7 +336,7 @@ class GPJob(GPResource):
             self.get_info()
 
         # Lazily load children
-        if self.children is not None:
+        if self.children:
             return self.children
         else:
             if 'children' in self.info:
