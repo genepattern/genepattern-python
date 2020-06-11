@@ -37,6 +37,12 @@ class GPServer(object):
         """
         return 'Basic %s' % base64.b64encode(bytes(self.username + ':' + self.password, 'ascii')).decode('ascii')
     
+    def system_message(self):
+        url = f"{self.url}/rest/v1/config/system-message"
+        request = urllib.request.Request(url)
+        response = urllib.request.urlopen(request)
+        return response.read().decode('utf-8')
+    
     def login(self):
         """Log in to the OAuth2 endpoint"""
         safe_username = urllib.parse.quote(self.username)
