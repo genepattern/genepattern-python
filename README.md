@@ -8,7 +8,7 @@ This is a Python library for working with GenePattern programmatically. Behind t
 
 ## Supported Python Versions
 
-This library requires Python 3.4+. The bundled data submodule `gp.data` also requires [pandas](http://pandas.pydata.org/), although the rest of the module does not.
+This library requires Python 3.6+. The bundled data submodule `gp.data` also requires [pandas](http://pandas.pydata.org/), although the rest of the module does not.
 
 **Python 2 Support:** Support for Python 2 was removed in version 1.4.0. Python 2 users should use version 1.3.1.
 
