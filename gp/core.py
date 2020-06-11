@@ -6,6 +6,7 @@ import time
 from contextlib import closing
 import urllib.request
 import urllib.parse
+import urllib.error
 
 
 GP_JOB_TAG = 'GenePattern Python Client'
@@ -35,6 +36,18 @@ class GPServer(object):
         requests sent to GenePattern.
         """
         return 'Basic %s' % base64.b64encode(bytes(self.username + ':' + self.password, 'ascii')).decode('ascii')
+    
+    def login(self):
+        """Log in to the OAuth2 endpoint"""
+        safe_username = urllib.parse.quote(self.username)
+        safe_password = urllib.parse.quote(self.password)
+        url = f"{self.url}/rest/v1/oauth2/token?grant_type=password&username={safe_username}&password={safe_password}&client_id=GenePatternNotebook-{safe_username}"
+
+        request = urllib.request.Request(url)
+        response = urllib.request.urlopen(request, b'')
+        if response.getcode() != 200:
+            raise urllib.error.HTTPError(url, response.getcode(), 'Invalid username or password', response.getheaders(), None)
+        return json.loads(response.read())['access_token']
 
     def upload_file(self, file_name, file_path):
         """
