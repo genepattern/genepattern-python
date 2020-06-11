@@ -496,6 +496,27 @@ class GPJob(GPResource):
         Returns the URL of the job's status page on the GenePattern server
         """
         return self.server_data.url + "/pages/index.jsf?jobid=" + self.uri
+    
+    def get_permissions(self):
+        """Get the permissions object for the GP job"""
+        url = f'{self.server_data.url}/rest/v1/jobs/{self.job_number}/permissions'
+        request = urllib.request.Request(url)
+        if self.server_data.authorization_header() is not None:
+            request.add_header('Authorization', self.server_data.authorization_header())
+        request.add_header('User-Agent', 'GenePatternRest')
+
+        response = urllib.request.urlopen(request)
+        return json.loads(response.read())
+        
+    def set_permissions(self, permissions):
+        """Set the group permissions for the job"""
+        url = f'{self.server_data.url}/rest/v1/jobs/{self.job_number}/permissions'
+        data = json.dumps(permissions).encode('utf8')
+        request = urllib.request.Request(url, data=data, method='PUT')
+        if job.server_data.authorization_header() is not None:
+            request.add_header('Authorization', self.server_data.authorization_header())
+        request.add_header('User-Agent', 'GenePatternRest')
+        urllib.request.urlopen(request)
 
 
 class GPJobSpec(object):
