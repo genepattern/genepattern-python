@@ -18,7 +18,7 @@
 
 1. Deploy to Production PyPi
 2. Navigate to Anaconda directory
-> cd anaconda
+> cd ~/opt/anaconda3
 3. Run the following, removing the existing directory if necessary:
 > conda skeleton pypi genepattern-python --version XXX
 4. Build the package:
