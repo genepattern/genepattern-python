@@ -130,6 +130,10 @@ class GPServer(object):
             job.wait_until_done()
         return job
 
+    def get_job(self, job_number):
+        job = GPJob(self, job_number)
+        return job
+
     def get_task_list(self):
         """
         Queries the GenePattern server and returns a list of GPTask objects,
@@ -513,7 +517,7 @@ class GPJob(GPResource):
         url = f'{self.server_data.url}/rest/v1/jobs/{self.job_number}/permissions'
         data = json.dumps(permissions).encode('utf8')
         request = urllib.request.Request(url, data=data, method='PUT')
-        if job.server_data.authorization_header() is not None:
+        if self.server_data.authorization_header() is not None:
             request.add_header('Authorization', self.server_data.authorization_header())
         request.add_header('User-Agent', 'GenePatternRest')
         urllib.request.urlopen(request)
