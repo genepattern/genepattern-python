@@ -70,7 +70,7 @@ class GPServer(object):
             :return: A GPFile object that wraps the URI of the uploaded file, or None if the upload fails.
         """
 
-        request = urllib.request.Request(self.url + '/rest/v1/data/upload/job_input?name=' + file_name)
+        request = urllib.request.Request(self.url + '/rest/v1/data/upload/job_input?name=' + urllib.parse.quote(file_name))
         if self.authorization_header() is not None:
             request.add_header('Authorization', self.authorization_header())
         request.add_header('User-Agent', 'GenePatternRest')
