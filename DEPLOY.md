@@ -23,9 +23,9 @@
 > conda skeleton pypi genepattern-python --version XXX
 4. Build the package:
 > conda build genepattern-python
-5. Upload the newly built package:
-> anaconda upload /Users/tabor/anaconda/conda-bld/osx-64/genepattern-python-XXX-py35_0.tar.bz2 -u genepattern
-6. Converting this package to builds for other operating systems can be done as shown below. You will need to upload each
+5. Converting this package to builds for other operating systems can be done as shown below. You will need to upload each
 built version using a separate upload command.
-> conda convert --platform all /Users/tabor/anaconda/conda-bld/osx-64/genepattern-python-XXX-py35_0.tar.bz2 -o conda-bld/
+> conda convert --platform all ./conda-bld/osx-64/genepattern-python-XXX-py37_0.tar.bz2 -o conda-bld/
+6. Upload the newly built package:
+> anaconda upload ./conda-bld/*/genepattern-python-XXX-py37_0.tar.bz2 -u genepattern
 7. Log into the [Anaconda website](https://anaconda.org/) to make sure everything is good.
