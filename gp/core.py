@@ -24,6 +24,7 @@ class GPServer(object):
         self.url = url
         self.username = username
         self.password = password
+        self.token = None
         self.last_job = None
 
     def __str__(self):
@@ -53,7 +54,8 @@ class GPServer(object):
         response = urllib.request.urlopen(request, b'')
         if response.getcode() != 200:
             raise urllib.error.HTTPError(url, response.getcode(), 'Invalid username or password', response.getheaders(), None)
-        return json.loads(response.read())['access_token']
+        self.token = json.loads(response.read())['access_token']
+        return self.token
 
     def upload_file(self, file_name, file_path):
         """
@@ -129,6 +131,11 @@ class GPServer(object):
         if wait_until_done:
             job.wait_until_done()
         return job
+
+    def get_token(self):
+        """Return the authentication token, logging in to obtain it if necessary"""
+        if self.token: return self.token
+        else: return self.login()
 
     def get_job(self, job_number):
         job = GPJob(self, job_number)
