@@ -13,11 +13,3 @@ __status__ = 'Production'
 
 # Import core functionality
 from .core import GPException, GPFile, GPJob, GPJobSpec, GPResource, GPServer, GPTask, GPTaskParam, GPJSONEncoder
-
-# Import subpackages, if available
-try:
-    import gp.utils
-except Exception:
-    # Ignore if subpackages are unavailable
-    True
-

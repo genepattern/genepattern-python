@@ -258,7 +258,13 @@ class GPFile(GPResource):
         if self.server_data.authorization_header() is not None:
             request.add_header('Authorization', self.server_data.authorization_header())
         request.add_header('User-Agent', 'GenePatternRest')
-        return urllib.request.urlopen(request)
+        try:
+            return urllib.request.urlopen(request)
+        except urllib.error.HTTPError as e:
+            if e.geturl():  # Handle S3 redirects if one is encountered
+                return urllib.request.urlopen(urllib.request.Request(e.geturl()))
+            else:
+                raise e
 
     def read(self):
         """
