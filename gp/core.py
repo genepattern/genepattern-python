@@ -535,6 +535,15 @@ class GPJob(GPResource):
         request.add_header('User-Agent', 'GenePatternRest')
         urllib.request.urlopen(request)
 
+    def terminate(self):
+        """Terminate a running or pending job"""
+        url = f'{self.server_data.url}/rest/v1/jobs/{self.job_number}/terminate'
+        request = urllib.request.Request(url, method='DELETE')
+        if self.server_data.authorization_header() is not None:
+            request.add_header('Authorization', self.server_data.authorization_header())
+        request.add_header('User-Agent', 'GenePatternRest')
+        return urllib.request.urlopen(request).code == 200
+
 
 class GPJobSpec(object):
     """
