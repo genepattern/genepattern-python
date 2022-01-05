@@ -1,5 +1,5 @@
 __authors__ = ['Thorin Tabor']
-__copyright__ = 'Copyright 2014-2020, Regents of the University of California & Broad Institute'
+__copyright__ = 'Copyright 2014-2022, Regents of the University of California & Broad Institute'
 __version__ = '0.1.2'
 __status__ = 'Beta'
 
@@ -49,8 +49,8 @@ class CLS:
                   or a string containing the raw data.
         """
 
-        hdr_line_re = re.compile("^(?P<samples>[0-9]+)\s+(?P<classes>[0-9]+)\s+1\s*$")
-        assign_line_re = re.compile("^\s*(?:\d+\s+)*\d+\s*$",re.ASCII)
+        hdr_line_re = re.compile(r"^(?P<samples>[0-9]+)\s+(?P<classes>[0-9]+)\s+1\s*$")
+        assign_line_re = re.compile(r"^\s*(?:.+\s+)*.+\s*$", re.ASCII)
 
         # Handle all the various initialization types and get an IO object
         cls_io = _obtain_io(cls_obj)
@@ -66,7 +66,7 @@ class CLS:
         if hdr_line_match:
             (self.num_samples, self.num_classes) = (int(hdr_line_match["samples"]), int(hdr_line_match["classes"]))
 
-            self.class_names = raw_lines[1].split()[1:]
+            self.class_names = raw_lines[1].replace('#', '').split()
             if len(self.class_names) != self.num_classes:
                 raise ValueError("Mismatch in {0} between number of class names declared ({1}) and number provided ({2})".format(cls_obj, self.num_classes, len(self.class_names)))
 
@@ -75,7 +75,7 @@ class CLS:
 
         assign_line_match = re.match(assign_line_re, raw_lines[2])
         if assign_line_match:
-            self.class_assignments = [int(i) for i in raw_lines[2].split()]
+            self.class_assignments = [i for i in raw_lines[2].split()]
             if self.num_samples != len(self.class_assignments):
                 raise ValueError("Mismatch in {0} between number of samples declared ({1}) and number of class assignments provided ({2})".format(cls_obj, self.num_samples, len(self.class_assignments)))
         else:
