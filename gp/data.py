@@ -30,9 +30,6 @@ def GCT(gct_obj):
     # Load the GCT file into a DataFrame
     df = pd.read_csv(gct_io, sep='\t', header=2, index_col=[0, 1], skip_blank_lines=True)
 
-    # Apply backwards compatible methods
-    _apply_backwards_compatibility(df)
-
     # Return the Dataframe
     return df
 
@@ -124,9 +121,6 @@ def ODF(odf_obj):
         # Load the ODF file into a DataFrame
         df = pd.read_csv(odf_string_io, sep='\t', header=None, names=column_names, skip_blank_lines=True)
 
-        # Apply backwards compatible methods
-        _apply_backwards_compatibility(df)
-
         # Apply ODF-specific properties
         _apply_odf_properties(df, headers, model)
 
@@ -195,17 +189,6 @@ def _is_url(url):
         return True
     else:
         return False
-
-
-def _apply_backwards_compatibility(df):
-    """
-    Attach properties to the Dataframe to make it backwards compatible with older versions of this library
-
-    :param df: The dataframe to be modified
-    """
-    df.row_count = types.MethodType(lambda self: len(self.index), df)
-    df.col_count = types.MethodType(lambda self: len(self.columns), df)
-    df.dataframe = df
 
 
 def _obtain_io(init_obj):
