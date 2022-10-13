@@ -310,6 +310,7 @@ class GPJob(GPResource):
     output_files = None
     num_output_files = None
     children = None
+    input_params = None
 
     def __init__(self, server_data, uri):
         super(GPJob, self).__init__(str(uri))
@@ -331,7 +332,7 @@ class GPJob(GPResource):
             * URL of Output Files
             * Number of Output Files
         """
-        request = urllib.request.Request(self.server_data.url + "/rest/v1/jobs/" + self.uri)
+        request = urllib.request.Request(self.server_data.url + "/rest/v1/jobs/" + self.uri + "?includeInputParams=true")
         if self.server_data.authorization_header() is not None:
             request.add_header('Authorization', self.server_data.authorization_header())
         request.add_header('User-Agent', 'GenePatternRest')
@@ -357,9 +358,18 @@ class GPJob(GPResource):
         self.log_files = self.info['logFiles']
         self.output_files = self.info['outputFiles']
         self.num_output_files = self.info['numOutputFiles']
+        self.input_params = self.info['inputParams']
 
         # Create children, if relevant
         self.children = self.get_child_jobs()
+
+    def get_input_params(self):
+        """Return the input parameters used to launch the job"""
+
+        # Lazily load info
+        if self.info is None: self.get_info()
+
+        return { list(p.keys())[0]:list(p.values())[0] for p in self.input_params }
 
     def get_child_jobs(self):
         """
