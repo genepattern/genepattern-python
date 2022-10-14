@@ -2,18 +2,32 @@
 
 1. Make sure setup.py and gp.py/__version__ are updated
 2. cd to *genepattern-python* directory
-3. Upload via *python setup.py sdist upload -r pypitest*
-4. If the upload fails go to https://testpypi.python.org/pypi and manually upload dist/genepattern-python-*.tar.gz
-5. Test the deploy by uninstalling and reinstalling the package: *sudo pip uninstall genepattern-python* and *sudo pip install --index-url https://test.pypi.org/simple/ genepattern-python* .
-
+3. Remove any residual build artifacts from the last time nbtools was built. This step is not necessary the first time the package is built.
+> rm dist/\*.tar.gz; rm dist/\*.whl
+4. Build the sdist and wheel artifacts.
+> python -m build .
+5. Upload the files by running:
+> twine upload -r pypitest dist/\*.tar.gz; twine upload -r pypitest dist/\*.whl
+6. If the upload fails go to [https://testpypi.python.org/pypi](https://testpypi.python.org/pypi) and manually upload dist/nbtools-*.tar.gz.
+7. Test the deploy by uninstalling and reinstalling the package: 
+> pip uninstall genepattern-python;
+> pip install -i https://test.pypi.org/simple/ genepattern-python
+> 
 # How to Deploy to Production PyPi
 
 1. First deploy to test and ensure everything is working correctly (see above).
 2. cd to *genepattern-python* directory
-3. Upload via *python setup.py sdist bdist_wheel; twine upload dist/**
-4. If the upload fails go to https://pypi.python.org/pypi and manually upload dist/genepattern-python-*.tar.gz
-5. Test the deploy by uninstalling and reinstalling the package: *sudo pip uninstall genepattern-python* and *sudo pip install genepattern-python* .
-
+4. Remove any residual build artifacts from the last time nbtools was built. This step is not necessary the first time the package is built.
+> rm dist/\*.tar.gz; rm dist/\*.whl
+5. Build the sdist and wheel artifacts.
+> python -m build .
+6. Upload the files by running:
+> twine upload dist/\*.tar.gz; twine upload dist/\*.whl
+7. If the upload fails go to [https://testpypi.python.org/pypi](https://testpypi.python.org/pypi) and manually upload dist/nbtools-*.tar.gz.
+8. Test the deploy by uninstalling and reinstalling the package: 
+> pip uninstall genepattern-python;
+> pip install genepattern-python
+> 
 # How to Deploy to Conda
 
 1. Deploy to Production PyPi
