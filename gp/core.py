@@ -120,7 +120,14 @@ class GPServer(object):
             request.add_header('Authorization', self.authorization_header())
         request.add_header('Content-Type', 'application/json')
         request.add_header('User-Agent', 'GenePatternRest')
-        response = urllib.request.urlopen(request, json_string)
+        try:
+            response = urllib.request.urlopen(request, json_string)
+        except urllib.error.HTTPError as e:
+            if e.code == 403:
+                print("job POST failed, your account is either over the data limit or you have too many jobs running")
+            else:
+                print(f" job POST failed, status code = {e.code}, {e.reason}")
+            return None
         if response.getcode() != 201:
             print(" job POST failed, status code = %i" % response.getcode())
             return None
