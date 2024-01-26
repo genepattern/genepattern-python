@@ -365,7 +365,7 @@ class GPJob(GPResource):
         self.log_files = self.info['logFiles']
         self.output_files = self.info['outputFiles']
         self.num_output_files = self.info['numOutputFiles']
-        self.input_params = self.info['inputParams']
+        self.input_params = self.info['inputParams'] if 'inputParams' in self.info else None
 
         # Create children, if relevant
         self.children = self.get_child_jobs()
